@@ -48,9 +48,10 @@ This project is a Next.js application that displays a table of 1000 orders. The 
 ├── app/
 │   ├── page.js          # Main page component
 │   ├── layout.js        # Layout component
+│   ├── globals.css      # Global styles
+│   ├── favicon.ico      # Favicon
 ├── public/              # Public assets
 ├── components/          # Reusable components (e.g., Table, Filters)
-├── styles/              # Global styles
 ├── data/                # JSON file with 1000 orders
 ├── README.md            # Project documentation
 └── tailwind.config.js   # Tailwind CSS configuration
