@@ -9,7 +9,6 @@ This project is a Next.js application that displays a table of 1000 orders. The 
 - **Filtering:** Implemented dynamic filtering functionality.
 - **Search:** Search through the orders with ease.
 - **Date Range:** Select and filter orders by date range.
-- **Navigation:** Smooth navigation across different pages.
 - **Styling:** Styled entirely with Tailwind CSS.
 
 ## Installation
@@ -17,8 +16,8 @@ This project is a Next.js application that displays a table of 1000 orders. The 
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/yourusername/nextjs-orders-table.git
-   cd nextjs-orders-table
+   git clone https://github.com/apelmahmudDev/orders-table.git
+   cd orders-table
    ```
 
 2. Install dependencies:
@@ -34,13 +33,6 @@ This project is a Next.js application that displays a table of 1000 orders. The 
    ```
 
 4. Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-## Usage
-
-1. The orders table will load with all 1000 orders.
-2. Use the filters and search bar to dynamically update the displayed data.
-3. Select a date range to filter orders by date.
-4. Navigate through different pages using the provided navigation buttons.
 
 ## Technologies Used
 
@@ -68,5 +60,5 @@ This project is a Next.js application that displays a table of 1000 orders. The 
 
 The project is hosted online and can be accessed at the following links:
 
-- **Live Demo:** [https://your-live-demo-link.com](https://your-live-demo-link.com)
-- **GitHub Repo:** [https://github.com/yourusername/nextjs-orders-table](https://github.com/yourusername/nextjs-orders-table)
+- **Live Demo:** [https://your-live-demo-link.com](https://orders-table.vercel.app)
+- **GitHub Repo:** [https://github.com/apelmahmudDev/orders-table](https://github.com/apelmahmudDev/orders-table)
