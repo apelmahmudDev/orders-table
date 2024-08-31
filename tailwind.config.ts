@@ -13,8 +13,9 @@ const config: Config = {
 			primary: "#2166F0",
 			secondary: "#667085",
 			orange: "#E46A11",
+			dark: "#0E1521",
 			gray: {
-				DEFAULT: "#F3F4F6",
+				DEFAULT: "#67686d",
 				dark: "#323232",
 			},
 		},
