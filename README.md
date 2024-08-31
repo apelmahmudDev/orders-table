@@ -60,5 +60,5 @@ This project is a Next.js application that displays a table of 1000 orders. The 
 
 The project is hosted online and can be accessed at the following links:
 
-- **Live Demo:** [https://your-live-demo-link.com](https://orders-table.vercel.app)
+- **Live Demo:** [https://orders-table.vercel.app](https://orders-table.vercel.app)
 - **GitHub Repo:** [https://github.com/apelmahmudDev/orders-table](https://github.com/apelmahmudDev/orders-table)
