@@ -7,6 +7,11 @@ const config: Config = {
 		"./app/**/*.{js,ts,jsx,tsx,mdx}",
 	],
 	theme: {
+		extend: {
+			boxShadow: {
+				table: "0px 3px 10px 0px rgba(119, 119, 119, 0.1)",
+			},
+		},
 		colors: {
 			white: "#FFFFFF",
 			black: "#000000",
