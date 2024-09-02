@@ -1,9 +1,112 @@
-import { PlusIcon } from "@/components/icons";
+"use client";
+import { useState, useEffect } from "react";
+import {
+	CalenderIcon,
+	CopyIcon,
+	PlusIcon,
+	ThreeDotsIcon,
+} from "@/components/icons";
+import RiderIcon from "@/public/assets/images/rider-icon.png";
+import SearchInput from "@/components/SearchInput";
+import Pagination from "@/components/Pagination";
+import Filter from "@/components/Filter";
+import Image from "next/image";
+import orders from "@/public/assets/data/orders.json";
+import Modal from "@/components/Modal";
+import DateRangePicker from "@/components/DateRangePicker";
 
 export default function Home() {
+	const [isModalOpen, setModalOpen] = useState(false);
+
+	const [filteredOrders, setFilteredOrders] = useState(orders);
+	const [searchTerm, setSearchTerm] = useState("");
+	const [statusFilter, setStatusFilter] = useState("");
+	const [paymentStatusFilter, setPaymentStatusFilter] = useState("");
+	// const [dateRange, setDateRange] = useState({ startDate: "", endDate: "" });
+	const [dateRange, setDateRange] = useState<{
+		startDate: string;
+		endDate: string;
+	}>({
+		startDate: "",
+		endDate: "",
+	});
+	const [currentPage, setCurrentPage] = useState(1);
+	const ordersPerPage = 5;
+
+	// Filtering Logic
+	useEffect(() => {
+		let results = orders;
+
+		// Search Filter
+		if (searchTerm) {
+			results = results.filter(
+				(order) =>
+					order.user.firstName
+						.toLowerCase()
+						.includes(searchTerm.toLowerCase()) ||
+					order.user.lastName
+						.toLowerCase()
+						.includes(searchTerm.toLowerCase()) ||
+					order._id.$oid.toLowerCase().includes(searchTerm.toLowerCase())
+			);
+		}
+
+		// Status Filter
+		if (statusFilter) {
+			results = results.filter((order) => order.status === statusFilter);
+		}
+
+		// Payment Status Filter
+		if (paymentStatusFilter) {
+			results = results.filter(
+				(order) => order.payment.status === paymentStatusFilter
+			);
+		}
+
+		// Date Range Filter
+		if (dateRange.startDate && dateRange.endDate) {
+			results = results.filter((order) => {
+				const orderDate = new Date(order.createdAt.$date);
+				return (
+					orderDate >= new Date(dateRange.startDate) &&
+					orderDate <= new Date(dateRange.endDate)
+				);
+			});
+		}
+
+		setFilteredOrders(results);
+		setCurrentPage(1); // Reset to first page when filters change
+	}, [searchTerm, statusFilter, paymentStatusFilter, dateRange]);
+
+	// Pagination Logic
+	const indexOfLastOrder = currentPage * ordersPerPage;
+	const indexOfFirstOrder = indexOfLastOrder - ordersPerPage;
+	const currentOrders = filteredOrders.slice(
+		indexOfFirstOrder,
+		indexOfLastOrder
+	);
+	const totalPages = Math.ceil(filteredOrders.length / ordersPerPage);
+
+	console.log("totalPages", totalPages);
+	console.log("currentPage", currentPage);
+	console.log("indexOfFirstOrder", indexOfFirstOrder);
+	console.log("indexOfLastOrder", indexOfLastOrder);
+	console.log("currentOrders", currentOrders);
+
+	const handlePageChange = (page: number) => {
+		setCurrentPage(page);
+	};
+
+	const handleOpenModal = () => setModalOpen(true);
+	const handleCloseModal = () => setModalOpen(false);
+
+	const handleDateChange = (startDate: string, endDate: string) => {
+		setDateRange({ startDate, endDate });
+	};
+
 	return (
 		<main className="my-4 max-w-[1400px] container">
-			<div className="flex items-center gap-1.5 justify-between mb-5">
+			{/* <div className="flex items-center gap-1.5 justify-between mb-5">
 				<h4 className="text-[22px] leading-[26.63px] text-dark font-medium">
 					Orders
 				</h4>
@@ -15,260 +118,101 @@ export default function Home() {
 						Create order
 					</button>
 				</div>
-			</div>
-			<div className="border border-[#EAECF0] rounded-xl">
-				<div>
+			</div> */}
+			<div className="border border-[#EAECF0] rounded-xl shadow-table overflow-hidden">
+				<div className="">
 					{/* start table header */}
-					<div className="flex items-center gap-[22px] pt-6 px-6">
+					<div className="flex flex-col sm:flex-row gap-[22px] pt-6 px-6">
 						{/* date picker */}
-						<div
-							id="date-range-picker"
-							date-rangepicker
-							className="flex items-center"
-						>
-							<div className="relative">
-								<div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
-									<svg
-										className="w-4 h-4 text-gray-500 dark:text-gray-400"
-										aria-hidden="true"
-										xmlns="http://www.w3.org/2000/svg"
-										fill="currentColor"
-										viewBox="0 0 20 20"
-									>
-										<path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" />
-									</svg>
-								</div>
-								<input
-									id="datepicker-range-start"
-									name="start"
-									type="date"
-									className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5  dark:bg-gray-700"
-									placeholder="Select date start"
-								/>
-							</div>
-						</div>
 
+						<button
+							onClick={handleOpenModal}
+							className="font-medium text-sm text-secondary-light flex flex-shrink-0 items-center gap-2 h-[62px] border border-gray-light rounded-lg px-[14px]"
+						>
+							<CalenderIcon />
+							<span>Select Date</span>
+						</button>
+
+						<Modal
+							isOpen={isModalOpen}
+							onClose={handleCloseModal}
+							title="Select Date"
+						>
+							<DateRangePicker onDateChange={handleDateChange} />
+						</Modal>
 						{/*  */}
-						<div className="w-full grid grid-cols-4 divide-x divide-[#EAECF0] border border-[#EAECF0] h-[62px] rounded-lg">
-							<div className="py-2.5 px-7">
-								<p className="text-gray font-medium text-sm">Total Revenue</p>
-								<p className="font-bold text-base">$12,084</p>
-							</div>
-							<div className="py-2.5 px-7">
-								<p className="text-gray font-medium text-sm">Total Revenue</p>
-								<p className="font-bold text-base">$12,084</p>
-							</div>
-							<div className="py-2.5 px-7">
-								<p className="text-gray font-medium text-sm">Total Revenue</p>
-								<p className="font-bold text-base">$12,084</p>
-							</div>
-							<div className="py-2.5 px-7">
-								<p className="text-gray font-medium text-sm">Total Revenue</p>
-								<p className="font-bold text-base">$12,084</p>
-							</div>
+						<div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 divide-y sm:divide-x divide-[#EAECF0] border border-[#EAECF0] rounded-lg">
+							{[
+								{ label: "Total Revenue", total: "12,089" },
+								{ label: "Order item", total: "184" },
+								{ label: "Return item", total: "12" },
+								{ label: "Fulfilled orders", total: "84" },
+							].map((item, idx) => (
+								<div key={idx} className="py-2.5 px-6 h-[62px]">
+									<p className="text-gray font-medium text-sm">{item?.label}</p>
+									<p className="font-bold text-base">${item.total}</p>
+								</div>
+							))}
 						</div>
 						{/*  */}
 					</div>
 					{/*  */}
-
 					<div className="mt-6 mb-[17px] h-[1px] w-full bg-[#EAECF0]"></div>
-
-					<div className="mb-[22px] flex item-center flex-wrap gap-4 px-6">
-						<button className="px-2 py-2.5 text-primary bg-[#F3F8FF] rounded-[6px] h-[37px] flex items-center font-medium">
-							<span>All orders</span>
-							<span className="ml-[5px] bg-primary text-white font-bold text-[11px] px-2 py-[6px] rounded-[3px]">
-								340
-							</span>
-						</button>
-						<button className="px-2 py-2.5 text-gray bg-white rounded-[6px] h-[37px] flex items-center border border-[#EAECF0] font-medium">
-							<span>Processing</span>
-							<span className="ml-[5px] bg-[#F3F8FF] text-primary font-bold text-[11px] px-2 py-[6px] rounded-[3px]">
-								340
-							</span>
-						</button>
+					<div className="mb-[22px] px-6 flex gap-4 flex-wrap justify-between items-start">
+						<div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+							<button className="px-2 py-2.5 text-primary bg-[#F3F8FF] rounded-[6px] h-[37px] flex items-center font-medium">
+								<span>All orders</span>
+								<span className="ml-[5px] bg-primary text-white font-bold text-[11px] px-2 py-[6px] rounded-[3px]">
+									340
+								</span>
+							</button>
+							<button className="px-2 py-2.5 text-gray bg-white rounded-[6px] h-[37px] flex items-center border border-[#EAECF0] font-medium">
+								<span>Processing</span>
+								<span className="ml-[5px] bg-[#F3F8FF] text-primary font-bold text-[11px] px-2 py-[6px] rounded-[3px]">
+									340
+								</span>
+							</button>
+							<button className="px-2 py-2.5 text-gray bg-white rounded-[6px] h-[37px] flex items-center border border-[#EAECF0] font-medium">
+								<span>Processing</span>
+								<span className="ml-[5px] bg-[#F3F8FF] text-primary font-bold text-[11px] px-2 py-[6px] rounded-[3px]">
+									340
+								</span>
+							</button>
+							<button className="px-2 py-2.5 text-gray bg-white rounded-[6px] h-[37px] flex items-center border border-[#EAECF0] font-medium">
+								<span>Processing</span>
+								<span className="ml-[5px] bg-[#F3F8FF] text-primary font-bold text-[11px] px-2 py-[6px] rounded-[3px]">
+									340
+								</span>
+							</button>
+							<button className="px-2 py-2.5 text-gray bg-white rounded-[6px] h-[37px] flex items-center border border-[#EAECF0] font-medium">
+								<span>Processing</span>
+								<span className="ml-[5px] bg-[#F3F8FF] text-primary font-bold text-[11px] px-2 py-[6px] rounded-[3px]">
+									340
+								</span>
+							</button>
+						</div>
+						<div className="flex items-center gap-4 max-w-[416px] w-full">
+							<SearchInput
+								onInputChange={(e) => setSearchTerm(e.target.value)}
+							/>
+							<Filter />
+						</div>
 					</div>
 					{/*  */}
 					{/* end table header */}
 
 					{/* table */}
-					<div className="relative overflow-x-auto shadow-md sm:rounded-lg">
-						<div className="flex flex-column sm:flex-row flex-wrap space-y-4 sm:space-y-0 items-center justify-between pb-4">
-							<div>
-								<button
-									id="dropdownRadioButton"
-									data-dropdown-toggle="dropdownRadio"
-									className="inline-flex items-center text-gray-500 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-3 py-1.5"
-									type="button"
-								>
-									<svg
-										className="w-3 h-3 text-gray-500 me-3"
-										aria-hidden="true"
-										xmlns="http://www.w3.org/2000/svg"
-										fill="currentColor"
-										viewBox="0 0 20 20"
-									>
-										<path d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm3.982 13.982a1 1 0 0 1-1.414 0l-3.274-3.274A1.012 1.012 0 0 1 9 10V6a1 1 0 0 1 2 0v3.586l2.982 2.982a1 1 0 0 1 0 1.414Z" />
-									</svg>
-									Last 30 days
-									<svg
-										className="w-2.5 h-2.5 ms-2.5"
-										aria-hidden="true"
-										xmlns="http://www.w3.org/2000/svg"
-										fill="none"
-										viewBox="0 0 10 6"
-									>
-										<path
-											stroke="currentColor"
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											stroke-width="2"
-											d="m1 1 4 4 4-4"
-										/>
-									</svg>
-								</button>
-								{/* Dropdown menu  */}
-								<div
-									id="dropdownRadio"
-									className="z-10 hidden w-48 bg-white divide-y divide-gray-100 rounded-lg shadow"
-									data-popper-reference-hidden=""
-									data-popper-escaped=""
-									data-popper-placement="top"
-									style={{
-										position: "absolute",
-										inset: "auto auto 0px 0px",
-										margin: "0px",
-										transform: "translate3d(522.5px, 3847.5px, 0px)",
-									}}
-								>
-									<ul
-										className="p-3 space-y-1 text-sm text-gray-700"
-										aria-labelledby="dropdownRadioButton"
-									>
-										<li>
-											<div className="flex items-center p-2 rounded hover:bg-gray-100">
-												<input
-													id="filter-radio-example-1"
-													type="radio"
-													value=""
-													name="filter-radio"
-													className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2"
-												/>
-												<label
-													htmlFor="filter-radio-example-1"
-													className="w-full ms-2 text-sm font-medium text-gray-900 rounded"
-												>
-													Last day
-												</label>
-											</div>
-										</li>
-										<li>
-											<div className="flex items-center p-2 rounded hover:bg-gray-100">
-												<input
-													checked=""
-													id="filter-radio-example-2"
-													type="radio"
-													value=""
-													name="filter-radio"
-													className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2"
-												/>
-												<label
-													htmlFor="filter-radio-example-2"
-													className="w-full ms-2 text-sm font-medium text-gray-900 rounded"
-												>
-													Last 7 days
-												</label>
-											</div>
-										</li>
-										<li>
-											<div className="flex items-center p-2 rounded hover:bg-gray-100">
-												<input
-													id="filter-radio-example-3"
-													type="radio"
-													value=""
-													name="filter-radio"
-													className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-												/>
-												<label
-													htmlFor="filter-radio-example-3"
-													className="w-full ms-2 text-sm font-medium text-gray-900 rounded"
-												>
-													Last 30 days
-												</label>
-											</div>
-										</li>
-										<li>
-											<div className="flex items-center p-2 rounded hover:bg-gray-100">
-												<input
-													id="filter-radio-example-4"
-													type="radio"
-													value=""
-													name="filter-radio"
-													className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-												/>
-												<label
-													htmlFor="filter-radio-example-4"
-													className="w-full ms-2 text-sm font-medium text-gray-900 rounded"
-												>
-													Last month
-												</label>
-											</div>
-										</li>
-										<li>
-											<div className="flex items-center p-2 rounded hover:bg-gray-100">
-												<input
-													id="filter-radio-example-5"
-													type="radio"
-													value=""
-													name="filter-radio"
-													className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-												/>
-												<label
-													htmlFor="filter-radio-example-5"
-													className="w-full ms-2 text-sm font-medium text-gray-900 rounded"
-												>
-													Last year
-												</label>
-											</div>
-										</li>
-									</ul>
-								</div>
-							</div>
-							<label htmlFor="table-search" className="sr-only">
-								Search
-							</label>
-							<div className="relative">
-								<div className="absolute inset-y-0 left-0 rtl:inset-r-0 rtl:right-0 flex items-center ps-3 pointer-events-none">
-									<svg
-										className="w-5 h-5 text-gray-500 dark:text-gray-400"
-										aria-hidden="true"
-										fill="currentColor"
-										viewBox="0 0 20 20"
-										xmlns="http://www.w3.org/2000/svg"
-									>
-										<path
-											fill-rule="evenodd"
-											d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
-											clip-rule="evenodd"
-										></path>
-									</svg>
-								</div>
-								<input
-									type="text"
-									id="table-search"
-									className="block p-2 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg w-80 bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-									placeholder="Search for items"
-								/>
-							</div>
-						</div>
-						<table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-							<thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-								<tr>
+					{/* <div className="relative overflow-x-auto shadow-md sm:rounded-lg max-h-[692px]"> */}
+					<div className="relative overflow-x-auto max-h-[692px]">
+						<table className="w-full text-sm text-left">
+							<thead className="text-xs">
+								<tr className="bg-[#F9FAFB] border-t border-t-[#EAECF0]">
 									<th scope="col" className="p-4">
 										<div className="flex items-center">
 											<input
 												id="checkbox-all-search"
 												type="checkbox"
-												className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+												className="w-4 h-4 rounded"
 											/>
 											<label htmlFor="checkbox-all-search" className="sr-only">
 												checkbox
@@ -281,7 +225,11 @@ export default function Home() {
 									<th scope="col" className="px-6 py-3">
 										Creating date
 									</th>
-									<th scope="col" className="px-6 py-3">
+									<th
+										style={{ minWidth: 280 }}
+										scope="col"
+										className="px-6 py-3"
+									>
 										Customer info
 									</th>
 									<th scope="col" className="px-6 py-3">
@@ -304,87 +252,93 @@ export default function Home() {
 											<PlusIcon />
 										</button>
 									</th>
-									<th scope="col" className="px-6 py-3">
-										Action
-									</th>
 								</tr>
 							</thead>
 							<tbody>
-								<tr className="bg-white border-b hover:bg-gray-50">
-									<td className="w-4 p-4">
-										<div className="flex items-center">
-											<input
-												id="checkbox-table-search-1"
-												type="checkbox"
-												className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
-											/>
-											<label
-												htmlFor="checkbox-table-search-1"
-												className="sr-only"
-											>
-												checkbox
-											</label>
-										</div>
-									</td>
-									<th
-										scope="row"
-										className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap"
+								{currentOrders.map((item, idx) => (
+									<tr
+										key={idx}
+										className={`bg-white hover:bg-[#F9FAFB] ${"border-b"} border-b-gray-light`}
 									>
-										#1043
-									</th>
-									<td className="px-6 py-4">Today at 9:30 a.m.</td>
-									<td className="px-6 py-4">Laptop</td>
-									<td className="px-6 py-4">৳ 121.00</td>
-									<td className="px-6 py-4">4 items</td>
-									<td className="px-6 py-4">Paid</td>
-									<td className="px-6 py-4">Paid</td>
-									<td className="px-6 py-4">Processing</td>
-									<td className="px-6 py-4">Processing</td>
-									<td className="px-6 py-4">
-										<a
-											href="#"
-											className="font-medium text-blue-600 dark:text-blue-500 hover:underline"
+										<td className="w-4 p-4">
+											<div className="flex items-center">
+												<input
+													id="checkbox-table-search-1"
+													type="checkbox"
+													className="w-4 h-4 text-blue-600 bg-gray-100 border-b-[#EAECF0] rounded focus:ring-blue-500 focus:ring-2"
+												/>
+												<label
+													htmlFor="checkbox-table-search-1"
+													className="sr-only"
+												>
+													checkbox
+												</label>
+											</div>
+										</td>
+										<th
+											scope="row"
+											className="px-6 py-4 font-medium whitespace-nowrap"
 										>
-											Edit
-										</a>
-									</td>
-								</tr>
-								{/* <tr className="bg-white hover:bg-gray-50">
-									<td className="w-4 p-4">
-										<div className="flex items-center">
-											<input
-												id="checkbox-table-3"
-												type="checkbox"
-												className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
-											/>
-											<label htmlFor="checkbox-table-3" className="sr-only">
-												checkbox
-											</label>
-										</div>
-									</td>
-									<th
-										scope="row"
-										className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap"
-									>
-										Apple iMac 27"
-									</th>
-									<td className="px-6 py-4">Silver</td>
-									<td className="px-6 py-4">PC Desktop</td>
-									<td className="px-6 py-4">$3999</td>
-									<td className="px-6 py-4">
-										<a
-											href="#"
-											className="font-medium text-blue-600 hover:underline"
-										>
-											Edit
-										</a>
-									</td>
-								</tr> */}
+											<div className="flex items-center">
+												<span className="uppercase">
+													#{item?._id?.$oid.slice(item?._id?.$oid.length - 5)}
+												</span>
+												<button className="ml-[5px]">
+													<CopyIcon />
+												</button>
+											</div>
+										</th>
+										<td className="px-6 py-4">{item?.createdAt?.$date}</td>
+										<td className="px-6 py-4">
+											<span>{`${item?.user?.firstName} ${item?.user?.lastName}`}</span>
+											<div className="flex items-center gap-1">
+												<span className="text-orange">{item?.user?.phone}</span>
+												<button className="ml-[5px]">
+													<CopyIcon />
+												</button>
+											</div>
+											<span>{item?.shipping?.address}</span>
+										</td>
+										<td className="px-6 py-4 text-secondary">
+											৳ {item?.totalAmount?.grandTotal}
+										</td>
+										<td className="px-6 py-4 text-secondary">
+											{item?.products?.length} items
+										</td>
+										<td className="px-6 py-4">
+											<span className="py-1 px-3 rounded-[30px] bg-[#E5F5EB] text-[#0D894F]">
+												{item?.payment?.status}
+											</span>
+										</td>
+										<td className="px-6 py-4">
+											<div>
+												<Image src={RiderIcon} alt="rider-icon" />
+												<span>{item?.delivery?.deliveryMethod}</span>
+											</div>
+										</td>
+										<td className="px-6 py-4">
+											<span className="py-1 px-3 rounded-[30px] bg-[#E5F5EB] text-[#667085]">
+												{item?.status}
+											</span>
+										</td>
+										<td className="px-6 py-4">
+											<button className="h-9 w-9 rounded-full bg-[#E5EFFF] flex items-center justify-center">
+												<ThreeDotsIcon />
+											</button>
+										</td>
+									</tr>
+								))}
 							</tbody>
 						</table>
 					</div>
 				</div>
 			</div>
+			{/* table pagination */}
+			<Pagination
+				currentPage={currentPage}
+				totalPages={totalPages}
+				onPageChange={handlePageChange}
+			/>
 		</main>
 	);
 }

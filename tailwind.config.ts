@@ -10,17 +10,22 @@ const config: Config = {
 		extend: {
 			boxShadow: {
 				table: "0px 3px 10px 0px rgba(119, 119, 119, 0.1)",
+				filter: "0px 4px 30px 0px rgba(119, 119, 119, 0.1)",
 			},
 		},
 		colors: {
 			white: "#FFFFFF",
 			black: "#000000",
 			primary: "#2166F0",
-			secondary: "#667085",
+			secondary: {
+				DEFAULT: "#667085",
+				light: "#696a6f", // 60%
+			},
 			orange: "#E46A11",
 			dark: "#0E1521",
 			gray: {
 				DEFAULT: "#67686d",
+				light: "#EAECF0",
 				dark: "#323232",
 			},
 		},
