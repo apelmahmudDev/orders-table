@@ -46,7 +46,7 @@ export default function Home() {
 		endDate: "",
 	});
 	const [currentPage, setCurrentPage] = useState<number>(1);
-	const ordersPerPage: number = 5;
+	const ordersPerPage: number = 15;
 
 	// Filtering Logic with Search Term & Date Range
 	useEffect(() => {
