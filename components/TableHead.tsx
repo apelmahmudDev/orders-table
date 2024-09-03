@@ -34,7 +34,7 @@ const TableHead = () => {
 				{columns.map((column) => (
 					<th
 						scope="col"
-						className="px-6 py-3"
+						className="px-6 py-3 text-gray"
 						key={column.id}
 						style={{ minWidth: column.minWidth }}
 					>

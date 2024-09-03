@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { ChevronIcon, CrossIcon, HamburgerIcon } from "./icons";
+import { FilterState } from "@/app/page";
 
 const dateCreated: string[] = [
 	"All",
@@ -20,11 +21,46 @@ const paymentStatus: string[] = [
 	"Cancelled",
 ];
 
-const Filter = () => {
-	const [filterOpen, setFilterOpen] = useState(false);
-	const [dateOpen, setDateOpen] = useState(false);
-	const [statusOpen, setStatusOpen] = useState(false);
-	const [paymentOpen, setPaymentOpen] = useState(false);
+interface FilterProps {
+	onFilterApply: (filters: FilterState) => void;
+}
+
+const Filter: React.FC<FilterProps> = ({ onFilterApply }) => {
+	const [filterOpen, setFilterOpen] = useState<boolean>(false);
+	const [dateRange, setDateRange] = useState<string>("All");
+	const [statusFilter, setStatusFilter] = useState<string[]>([]);
+	const [paymentStatusFilter, setPaymentStatusFilter] = useState<string[]>([]);
+
+	const [dateOpen, setDateOpen] = useState<boolean>(false);
+	const [statusOpen, setStatusOpen] = useState<boolean>(false);
+	const [paymentOpen, setPaymentOpen] = useState<boolean>(false);
+
+	console.log(dateRange, statusFilter, paymentStatusFilter);
+
+	const handleApplyFilter = () => {
+		onFilterApply({
+			dateRange,
+			status: statusFilter,
+			paymentStatus: paymentStatusFilter,
+		});
+		setFilterOpen(false);
+	};
+
+	const handleStatusChange = (status: string) => {
+		setStatusFilter((prev) =>
+			prev.includes(status)
+				? prev.filter((s) => s !== status)
+				: [...prev, status]
+		);
+	};
+
+	const handlePaymentStatusChange = (status: string) => {
+		setPaymentStatusFilter((prev) =>
+			prev.includes(status)
+				? prev.filter((s) => s !== status)
+				: [...prev, status]
+		);
+	};
 
 	return (
 		<div className="relative">
@@ -60,7 +96,14 @@ const Filter = () => {
 							<p className="font-medium text-base text-[#333843]">
 								Filter your orders
 							</p>
-							<button className="font-medium text-sm underline text-gray">
+							<button
+								onClick={() => {
+									setDateRange("All");
+									setStatusFilter([]);
+									setPaymentStatusFilter([]);
+								}}
+								className="font-medium text-sm underline text-gray"
+							>
 								Reset
 							</button>
 						</div>
@@ -68,20 +111,26 @@ const Filter = () => {
 						<div className="max-h-[400px] overflow-y-auto px-5">
 							{/* filter by date */}
 							<div className="w-full rounded-lg border border-gray-light">
-								<ChevronButton open={dateOpen} setOpen={setDateOpen} />
+								<ChevronButton
+									open={dateOpen}
+									setOpen={setDateOpen}
+									label="Date Created"
+								/>
 								{dateOpen && (
 									<div className="p-3">
 										{dateCreated.map((item, idx) => (
 											<div key={idx} className="my-3 flex items-center">
 												<input
-													id={`default-radio-${idx}`}
+													id={`date-radio-${idx}`}
 													type="radio"
-													value=""
-													name="default-radio"
+													value={item}
+													name="date-radio"
 													className="w-4 h-4 cursor-pointer"
+													checked={dateRange === item}
+													onChange={() => setDateRange(item)}
 												/>
 												<label
-													htmlFor={`default-radio-${idx}`}
+													htmlFor={`date-radio-${idx}`}
 													className="ms-2 font-medium text-sm text-[#696a6f] cursor-pointer select-none"
 												>
 													{item}
@@ -93,51 +142,57 @@ const Filter = () => {
 							</div>
 							{/* filter by status */}
 							<div className="mt-4 w-full rounded-lg border border-gray-light">
-								<ChevronButton open={statusOpen} setOpen={setStatusOpen} />
+								<ChevronButton
+									open={statusOpen}
+									setOpen={setStatusOpen}
+									label="Status"
+								/>
 								{statusOpen && (
 									<div className="p-3">
 										{status.map((item, idx) => (
 											<div key={idx} className="mb-4 flex items-center">
-												<div className="flex items-center">
-													<input
-														id={`link-checkbox-${idx}`}
-														type="checkbox"
-														value=""
-														className="w-4 h-4 cursor-pointer"
-													/>
-													<label
-														htmlFor={`link-checkbox-${idx}`}
-														className="ms-2 font-medium text-sm text-[#696a6f] cursor-pointer select-none"
-													>
-														{item}
-													</label>
-												</div>
+												<input
+													id={`status-checkbox-${idx}`}
+													type="checkbox"
+													className="w-4 h-4 cursor-pointer"
+													checked={statusFilter.includes(item)}
+													onChange={() => handleStatusChange(item)}
+												/>
+												<label
+													htmlFor={`status-checkbox-${idx}`}
+													className="ms-2 font-medium text-sm text-[#696a6f] cursor-pointer select-none"
+												>
+													{item}
+												</label>
 											</div>
 										))}
 									</div>
 								)}
 							</div>
-							{/* filter by  payment status */}
+							{/* filter by payment status */}
 							<div className="mt-4 w-full rounded-lg border border-gray-light">
-								<ChevronButton open={paymentOpen} setOpen={setPaymentOpen} />
+								<ChevronButton
+									open={paymentOpen}
+									setOpen={setPaymentOpen}
+									label="Payment Status"
+								/>
 								{paymentOpen && (
 									<div className="p-3">
 										{paymentStatus.map((item, idx) => (
 											<div key={idx} className="mb-4 flex items-center">
-												<div className="flex items-center">
-													<input
-														id={`link-checkbox-${item}`}
-														type="checkbox"
-														value=""
-														className="w-4 h-4 cursor-pointer"
-													/>
-													<label
-														htmlFor={`link-checkbox-${item}`}
-														className="ms-2 font-medium text-sm text-[#696a6f] cursor-pointer select-none"
-													>
-														{item}
-													</label>
-												</div>
+												<input
+													id={`payment-checkbox-${idx}`}
+													type="checkbox"
+													className="w-4 h-4 cursor-pointer"
+													checked={paymentStatusFilter.includes(item)}
+													onChange={() => handlePaymentStatusChange(item)}
+												/>
+												<label
+													htmlFor={`payment-checkbox-${idx}`}
+													className="ms-2 font-medium text-sm text-[#696a6f] cursor-pointer select-none"
+												>
+													{item}
+												</label>
 											</div>
 										))}
 									</div>
@@ -146,10 +201,16 @@ const Filter = () => {
 						</div>
 
 						<div className="mt-6 mb-4 flex items-center gap-[14px] justify-end px-5">
-							<button className="text-secondary-light font-medium text-[15px] h-10 flex items-center px-3 rounded-md border border-gray-light bg-white">
+							<button
+								onClick={() => setFilterOpen(false)}
+								className="text-secondary-light font-medium text-[15px] h-10 flex items-center px-3 rounded-md border border-gray-light bg-white"
+							>
 								Cancel
 							</button>
-							<button className="text-white font-medium text-[15px] h-10 flex items-center px-3 rounded-md border border-gray-light bg-primary">
+							<button
+								onClick={handleApplyFilter}
+								className="text-white font-medium text-[15px] h-10 flex items-center px-3 rounded-md border border-gray-light bg-primary"
+							>
 								Apply Filter
 							</button>
 						</div>
@@ -165,16 +226,18 @@ export default Filter;
 const ChevronButton = ({
 	open,
 	setOpen,
+	label,
 }: {
 	open: boolean;
 	setOpen: (open: boolean) => void;
+	label: string;
 }) => {
 	return (
 		<button
 			onClick={() => setOpen(!open)}
 			className="bg-[#F9FAFB] h-[36px] w-full flex items-center justify-between px-3 font-medium text-sm text-[#333843]"
 		>
-			<span>Date Created</span>
+			<span>{label}</span>
 			<span
 				style={{
 					transform: open ? "rotate(0deg)" : "rotate(180deg)",

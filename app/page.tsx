@@ -20,12 +20,18 @@ import DateRangePicker from "@/components/DateRangePicker";
 import RiderIcon from "@/public/assets/images/rider-icon.png";
 import { CalenderIcon, CopyIcon, ThreeDotsIcon } from "@/components/icons";
 
+export interface FilterState {
+	dateRange: string;
+	status: string[];
+	paymentStatus: string[];
+}
+
 export default function Home() {
-	const [isModalOpen, setModalOpen] = useState(false);
+	const [isModalOpen, setModalOpen] = useState<boolean>(false);
 	const [filteredOrders, setFilteredOrders] = useState(orders);
-	const [searchTerm, setSearchTerm] = useState("");
-	const [statusFilter, setStatusFilter] = useState("");
-	const [paymentStatusFilter, setPaymentStatusFilter] = useState("");
+	const [searchTerm, setSearchTerm] = useState<string>("");
+	const [statusFilter, setStatusFilter] = useState<string>("");
+	const [paymentStatusFilter, setPaymentStatusFilter] = useState<string>("");
 	const [dateRange, setDateRange] = useState<{
 		startDate: string;
 		endDate: string;
@@ -33,37 +39,28 @@ export default function Home() {
 		startDate: "",
 		endDate: "",
 	});
-	const [currentPage, setCurrentPage] = useState(1);
-	const ordersPerPage = 5;
+	const [currentPage, setCurrentPage] = useState<number>(1);
+	const ordersPerPage: number = 5;
 
-	// Filtering Logic
+	// Filtering Logic with Search Term & Date Range
 	useEffect(() => {
 		let results = orders;
 
-		// Search Filter
+		// search by order id, user name, phone number, address
 		if (searchTerm) {
-			results = results.filter(
-				(order) =>
-					order.user.firstName
-						.toLowerCase()
-						.includes(searchTerm.toLowerCase()) ||
-					order.user.lastName
-						.toLowerCase()
-						.includes(searchTerm.toLowerCase()) ||
-					order._id.$oid.toLowerCase().includes(searchTerm.toLowerCase())
-			);
-		}
+			results = results.filter((order) => {
+				const orderID = order._id.$oid;
+				const userName = `${order.user.firstName} ${order.user.lastName}`;
+				const userPhone = order.user.phone;
+				const userAddress = order.shipping.address;
 
-		// Status Filter
-		if (statusFilter) {
-			results = results.filter((order) => order.status === statusFilter);
-		}
-
-		// Payment Status Filter
-		if (paymentStatusFilter) {
-			results = results.filter(
-				(order) => order.payment.status === paymentStatusFilter
-			);
+				return (
+					orderID.toLowerCase().includes(searchTerm.toLowerCase()) ||
+					userName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+					userPhone.toLowerCase().includes(searchTerm.toLowerCase()) ||
+					userAddress.toLowerCase().includes(searchTerm.toLowerCase())
+				);
+			});
 		}
 
 		// Date Range Filter
@@ -81,6 +78,57 @@ export default function Home() {
 		setCurrentPage(1); // Reset to first page when filters change
 	}, [searchTerm, statusFilter, paymentStatusFilter, dateRange]);
 
+	const applyFilters = (filters: FilterState) => {
+		let results = orders;
+
+		// Filter by Date
+		const today = new Date();
+		let startDate: Date | null = null;
+
+		switch (filters.dateRange) {
+			case "Last week":
+				startDate = new Date(today.setDate(today.getDate() - 7));
+				break;
+			case "Last month":
+				startDate = new Date(today.setMonth(today.getMonth() - 1));
+				break;
+			case "Last 3 months":
+				startDate = new Date(today.setMonth(today.getMonth() - 3));
+				break;
+			case "Last 6 months":
+				startDate = new Date(today.setMonth(today.getMonth() - 6));
+				break;
+			case "Last year":
+				startDate = new Date(today.setFullYear(today.getFullYear() - 1));
+				break;
+			default:
+				startDate = null;
+		}
+
+		if (startDate) {
+			results = results.filter((order) => {
+				const orderDate = new Date(order.createdAt.$date);
+				return orderDate >= startDate;
+			});
+		}
+
+		// Filter by Status
+		if (filters.status.length > 0) {
+			results = results.filter((order) =>
+				filters.status.includes(order.status)
+			);
+		}
+
+		// Filter by Payment Status
+		if (filters.paymentStatus.length > 0) {
+			results = results.filter((order) =>
+				filters.paymentStatus.includes(order.payment.status)
+			);
+		}
+
+		setFilteredOrders(results);
+	};
+
 	// Pagination Logic
 	const indexOfLastOrder = currentPage * ordersPerPage;
 	const indexOfFirstOrder = indexOfLastOrder - ordersPerPage;
@@ -89,12 +137,6 @@ export default function Home() {
 		indexOfLastOrder
 	);
 	const totalPages = Math.ceil(filteredOrders.length / ordersPerPage);
-
-	console.log("totalPages", totalPages);
-	console.log("currentPage", currentPage);
-	console.log("indexOfFirstOrder", indexOfFirstOrder);
-	console.log("indexOfLastOrder", indexOfLastOrder);
-	console.log("currentOrders", currentOrders);
 
 	const handlePageChange = (page: number) => {
 		setCurrentPage(page);
@@ -122,7 +164,7 @@ export default function Home() {
 					</button>
 				</div>
 			</div> */}
-			<div className="border border-[#EAECF0] rounded-xl shadow-table overflow-hidden">
+			<div className="border border-[#EAECF0] rounded-xl shadow-table">
 				<div>
 					{/* table summary */}
 					<div className="flex flex-col sm:flex-row gap-[22px] pt-6 px-6">
@@ -150,7 +192,10 @@ export default function Home() {
 					{/* search & filter */}
 					<div className="mb-[22px] px-6 flex gap-4 flex-wrap justify-between items-start">
 						<OrderStatus />
-						<FilterNSearch setSearchTerm={setSearchTerm} />
+						<FilterNSearch
+							setSearchTerm={setSearchTerm}
+							onFilterApply={applyFilters}
+						/>
 					</div>
 
 					{/* table */}
