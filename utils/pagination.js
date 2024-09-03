@@ -1,9 +1,5 @@
-export const getVisiblePages = (
-	currentPage: number,
-	totalPages: number
-): (number | string)[] => {
-	const pages: (number | string)[] = [];
-
+export const getVisiblePages = (currentPage, totalPages) => {
+	const pages = [];
 	if (totalPages <= 5) {
 		// Show all pages if there are 5 or less
 		for (let i = 1; i <= totalPages; i++) {
@@ -24,6 +20,5 @@ export const getVisiblePages = (
 		// Show the last page
 		pages.push(totalPages);
 	}
-
 	return pages;
 };
