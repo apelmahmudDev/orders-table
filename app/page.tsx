@@ -160,7 +160,7 @@ export default function Home() {
 		<main className="">
 			<Navbar />
 			<div className="my-4 max-w-[1400px] container">
-				<div className="flex items-center gap-1.5 justify-between mb-5">
+				<div className="flex flex-wrap items-center gap-1.5 justify-between mb-5">
 					<h4 className="text-[22px] leading-[26.63px] text-dark font-medium">
 						Orders
 					</h4>
