@@ -1,28 +1,31 @@
 "use client";
-import { useState, useEffect } from "react";
-import {
-	CalenderIcon,
-	CopyIcon,
-	PlusIcon,
-	ThreeDotsIcon,
-} from "@/components/icons";
-import RiderIcon from "@/public/assets/images/rider-icon.png";
-import SearchInput from "@/components/SearchInput";
-import Pagination from "@/components/Pagination";
-import Filter from "@/components/Filter";
+
 import Image from "next/image";
+
+import { useState, useEffect } from "react";
+
 import orders from "@/public/assets/data/orders.json";
+
+// components
 import Modal from "@/components/Modal";
+import TableHead from "@/components/TableHead";
+import Pagination from "@/components/Pagination";
+import TableNoData from "@/components/TableNoData";
+import OrderStatus from "@/components/OrderStatus";
+import OrderSummary from "@/components/OrderSummary";
+import FilterNSearch from "@/components/FilterNSearch";
 import DateRangePicker from "@/components/DateRangePicker";
+
+// icons
+import RiderIcon from "@/public/assets/images/rider-icon.png";
+import { CalenderIcon, CopyIcon, ThreeDotsIcon } from "@/components/icons";
 
 export default function Home() {
 	const [isModalOpen, setModalOpen] = useState(false);
-
 	const [filteredOrders, setFilteredOrders] = useState(orders);
 	const [searchTerm, setSearchTerm] = useState("");
 	const [statusFilter, setStatusFilter] = useState("");
 	const [paymentStatusFilter, setPaymentStatusFilter] = useState("");
-	// const [dateRange, setDateRange] = useState({ startDate: "", endDate: "" });
 	const [dateRange, setDateRange] = useState<{
 		startDate: string;
 		endDate: string;
@@ -120,11 +123,10 @@ export default function Home() {
 				</div>
 			</div> */}
 			<div className="border border-[#EAECF0] rounded-xl shadow-table overflow-hidden">
-				<div className="">
-					{/* start table header */}
+				<div>
+					{/* table summary */}
 					<div className="flex flex-col sm:flex-row gap-[22px] pt-6 px-6">
 						{/* date picker */}
-
 						<button
 							onClick={handleOpenModal}
 							className="font-medium text-sm text-secondary-light flex flex-shrink-0 items-center gap-2 h-[62px] border border-gray-light rounded-lg px-[14px]"
@@ -132,7 +134,6 @@ export default function Home() {
 							<CalenderIcon />
 							<span>Select Date</span>
 						</button>
-
 						<Modal
 							isOpen={isModalOpen}
 							onClose={handleCloseModal}
@@ -140,120 +141,22 @@ export default function Home() {
 						>
 							<DateRangePicker onDateChange={handleDateChange} />
 						</Modal>
-						{/*  */}
-						<div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 divide-y sm:divide-x divide-[#EAECF0] border border-[#EAECF0] rounded-lg">
-							{[
-								{ label: "Total Revenue", total: "12,089" },
-								{ label: "Order item", total: "184" },
-								{ label: "Return item", total: "12" },
-								{ label: "Fulfilled orders", total: "84" },
-							].map((item, idx) => (
-								<div key={idx} className="py-2.5 px-6 h-[62px]">
-									<p className="text-gray font-medium text-sm">{item?.label}</p>
-									<p className="font-bold text-base">${item.total}</p>
-								</div>
-							))}
-						</div>
-						{/*  */}
+						<OrderSummary />
 					</div>
-					{/*  */}
-					<div className="mt-6 mb-[17px] h-[1px] w-full bg-[#EAECF0]"></div>
+
+					{/* divider */}
+					<div className="mt-6 mb-[17px] h-[1px] w-full bg-[#EAECF0]" />
+
+					{/* search & filter */}
 					<div className="mb-[22px] px-6 flex gap-4 flex-wrap justify-between items-start">
-						<div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-							<button className="px-2 py-2.5 text-primary bg-[#F3F8FF] rounded-[6px] h-[37px] flex items-center font-medium">
-								<span>All orders</span>
-								<span className="ml-[5px] bg-primary text-white font-bold text-[11px] px-2 py-[6px] rounded-[3px]">
-									340
-								</span>
-							</button>
-							<button className="px-2 py-2.5 text-gray bg-white rounded-[6px] h-[37px] flex items-center border border-[#EAECF0] font-medium">
-								<span>Processing</span>
-								<span className="ml-[5px] bg-[#F3F8FF] text-primary font-bold text-[11px] px-2 py-[6px] rounded-[3px]">
-									340
-								</span>
-							</button>
-							<button className="px-2 py-2.5 text-gray bg-white rounded-[6px] h-[37px] flex items-center border border-[#EAECF0] font-medium">
-								<span>Processing</span>
-								<span className="ml-[5px] bg-[#F3F8FF] text-primary font-bold text-[11px] px-2 py-[6px] rounded-[3px]">
-									340
-								</span>
-							</button>
-							<button className="px-2 py-2.5 text-gray bg-white rounded-[6px] h-[37px] flex items-center border border-[#EAECF0] font-medium">
-								<span>Processing</span>
-								<span className="ml-[5px] bg-[#F3F8FF] text-primary font-bold text-[11px] px-2 py-[6px] rounded-[3px]">
-									340
-								</span>
-							</button>
-							<button className="px-2 py-2.5 text-gray bg-white rounded-[6px] h-[37px] flex items-center border border-[#EAECF0] font-medium">
-								<span>Processing</span>
-								<span className="ml-[5px] bg-[#F3F8FF] text-primary font-bold text-[11px] px-2 py-[6px] rounded-[3px]">
-									340
-								</span>
-							</button>
-						</div>
-						<div className="flex items-center gap-4 max-w-[416px] w-full">
-							<SearchInput
-								onInputChange={(e) => setSearchTerm(e.target.value)}
-							/>
-							<Filter />
-						</div>
+						<OrderStatus />
+						<FilterNSearch setSearchTerm={setSearchTerm} />
 					</div>
-					{/*  */}
-					{/* end table header */}
 
 					{/* table */}
-					{/* <div className="relative overflow-x-auto shadow-md sm:rounded-lg max-h-[692px]"> */}
 					<div className="relative overflow-x-auto max-h-[692px]">
 						<table className="w-full text-sm text-left">
-							<thead className="text-xs">
-								<tr className="bg-[#F9FAFB] border-t border-t-[#EAECF0]">
-									<th scope="col" className="p-4">
-										<div className="flex items-center">
-											<input
-												id="checkbox-all-search"
-												type="checkbox"
-												className="w-4 h-4 rounded"
-											/>
-											<label htmlFor="checkbox-all-search" className="sr-only">
-												checkbox
-											</label>
-										</div>
-									</th>
-									<th scope="col" className="px-6 py-3">
-										Order Id
-									</th>
-									<th scope="col" className="px-6 py-3">
-										Creating date
-									</th>
-									<th
-										style={{ minWidth: 280 }}
-										scope="col"
-										className="px-6 py-3"
-									>
-										Customer info
-									</th>
-									<th scope="col" className="px-6 py-3">
-										Total
-									</th>
-									<th scope="col" className="px-6 py-3">
-										Quantity
-									</th>
-									<th scope="col" className="px-6 py-3">
-										Payment status
-									</th>
-									<th scope="col" className="px-6 py-3">
-										Delivery method
-									</th>
-									<th scope="col" className="px-6 py-3">
-										Status
-									</th>
-									<th scope="col" className="px-6 py-3">
-										<button>
-											<PlusIcon />
-										</button>
-									</th>
-								</tr>
-							</thead>
+							<TableHead />
 							<tbody>
 								{currentOrders.map((item, idx) => (
 									<tr
@@ -328,6 +231,16 @@ export default function Home() {
 										</td>
 									</tr>
 								))}
+								{currentOrders.length === 0 && (
+									<tr>
+										<td colSpan={10}>
+											<TableNoData
+												title="No orders found"
+												message="No orders found for the selected filters"
+											/>
+										</td>
+									</tr>
+								)}
 							</tbody>
 						</table>
 					</div>

@@ -1,5 +1,3 @@
-"use client";
-
 import { getVisiblePages } from "@/utils/pagination";
 import { ArrowLeftIcon, ArrowRightIcon } from "./icons";
 

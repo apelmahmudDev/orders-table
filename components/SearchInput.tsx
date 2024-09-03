@@ -20,7 +20,7 @@ const SearchInput = ({ onInputChange }: SearchInputProps) => {
 					type="text"
 					id="table-search"
 					className="block p-2 ps-10 text-sm text-gray border border-gray-light rounded-lg w-full focus:ring-blue-500 focus:border-blue-500"
-					placeholder="Search for items"
+					placeholder="Searching order..."
 				/>
 			</div>
 		</Fragment>

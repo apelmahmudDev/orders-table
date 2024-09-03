@@ -1,6 +1,24 @@
 import { useState } from "react";
 import { ChevronIcon, CrossIcon, HamburgerIcon } from "./icons";
-import Button from "./Button";
+
+const dateCreated: string[] = [
+	"All",
+	"Last week",
+	"Last month",
+	"Last 3 months",
+	"Last 6 months",
+	"Last year",
+];
+
+const status: string[] = ["Processing", "Shipped", "Delivered", "Cancelled"];
+
+const paymentStatus: string[] = [
+	"Paid",
+	"Unpaid",
+	"Refunded",
+	"In Progress",
+	"Cancelled",
+];
 
 const Filter = () => {
 	const [filterOpen, setFilterOpen] = useState(false);
@@ -50,125 +68,74 @@ const Filter = () => {
 						<div className="max-h-[400px] overflow-y-auto px-5">
 							{/* filter by date */}
 							<div className="w-full rounded-lg border border-gray-light">
-								<button
-									onClick={() => setDateOpen(!dateOpen)}
-									className="bg-[#F9FAFB] h-[36px] w-full flex items-center justify-between px-3 font-medium text-sm text-[#333843]"
-								>
-									<span>Date Created</span>
-									<span
-										style={{
-											transform: dateOpen ? "rotate(0deg)" : "rotate(180deg)",
-										}}
-									>
-										<ChevronIcon />
-									</span>
-								</button>
+								<ChevronButton open={dateOpen} setOpen={setDateOpen} />
 								{dateOpen && (
 									<div className="p-3">
-										<div className="mb-4 flex items-center">
-											<input
-												checked
-												id="default-radio-1"
-												type="radio"
-												value=""
-												name="default-radio"
-												className="w-4 h-4 cursor-pointer"
-											/>
-											<label
-												htmlFor="default-radio-1"
-												className="ms-2 font-medium text-sm text-[#696a6f] cursor-pointer select-none"
-											>
-												All
-											</label>
-										</div>
-										<div className="mt-4 flex items-center">
-											<input
-												checked
-												id="default-radio-2"
-												type="radio"
-												value=""
-												name="default-radio"
-												className="w-4 h-4 cursor-pointer"
-											/>
-											<label
-												htmlFor="default-radio-2"
-												className="ms-2 font-medium text-sm text-[#696a6f] cursor-pointer select-none"
-											>
-												Last week
-											</label>
-										</div>
+										{dateCreated.map((item, idx) => (
+											<div key={idx} className="my-3 flex items-center">
+												<input
+													id={`default-radio-${idx}`}
+													type="radio"
+													value=""
+													name="default-radio"
+													className="w-4 h-4 cursor-pointer"
+												/>
+												<label
+													htmlFor={`default-radio-${idx}`}
+													className="ms-2 font-medium text-sm text-[#696a6f] cursor-pointer select-none"
+												>
+													{item}
+												</label>
+											</div>
+										))}
 									</div>
 								)}
 							</div>
 							{/* filter by status */}
 							<div className="mt-4 w-full rounded-lg border border-gray-light">
-								<button
-									onClick={() => setStatusOpen(!statusOpen)}
-									className="bg-[#F9FAFB] h-[36px] w-full flex items-center justify-between px-3 font-medium text-sm text-[#333843]"
-								>
-									<span>Status</span>
-									<span
-										style={{
-											transform: statusOpen ? "rotate(0deg)" : "rotate(180deg)",
-										}}
-									>
-										<ChevronIcon />
-									</span>
-								</button>
+								<ChevronButton open={statusOpen} setOpen={setStatusOpen} />
 								{statusOpen && (
 									<div className="p-3">
-										<div className="mb-4 flex items-center">
-											<div className="flex items-center">
-												<input
-													id="link-checkbox"
-													type="checkbox"
-													value=""
-													className="w-4 h-4 cursor-pointer"
-												/>
-												<label
-													htmlFor="link-checkbox"
-													className="ms-2 font-medium text-sm text-[#696a6f] cursor-pointer select-none"
-												>
-													Processing
-												</label>
-											</div>
-										</div>
-									</div>
-								)}
-							</div>
-							{/* filter by  payment status */}
-							<div className="mt-4 w-full rounded-lg border border-gray-light">
-								<button
-									onClick={() => setPaymentOpen(!paymentOpen)}
-									className="bg-[#F9FAFB] h-[36px] w-full flex items-center justify-between px-3 font-medium text-sm text-[#333843]"
-								>
-									<span>Payment Status</span>
-									<span
-										style={{
-											transform: paymentOpen
-												? "rotate(0deg)"
-												: "rotate(180deg)",
-										}}
-									>
-										<ChevronIcon />
-									</span>
-								</button>
-								{paymentOpen && (
-									<div className="p-3">
-										{[...Array(2)].map((_, i) => (
-											<div key={i} className="mb-4 flex items-center">
+										{status.map((item, idx) => (
+											<div key={idx} className="mb-4 flex items-center">
 												<div className="flex items-center">
 													<input
-														id="link-checkbox-2"
+														id={`link-checkbox-${idx}`}
 														type="checkbox"
 														value=""
 														className="w-4 h-4 cursor-pointer"
 													/>
 													<label
-														htmlFor="link-checkbox-2"
+														htmlFor={`link-checkbox-${idx}`}
 														className="ms-2 font-medium text-sm text-[#696a6f] cursor-pointer select-none"
 													>
-														Processing
+														{item}
+													</label>
+												</div>
+											</div>
+										))}
+									</div>
+								)}
+							</div>
+							{/* filter by  payment status */}
+							<div className="mt-4 w-full rounded-lg border border-gray-light">
+								<ChevronButton open={paymentOpen} setOpen={setPaymentOpen} />
+								{paymentOpen && (
+									<div className="p-3">
+										{paymentStatus.map((item, idx) => (
+											<div key={idx} className="mb-4 flex items-center">
+												<div className="flex items-center">
+													<input
+														id={`link-checkbox-${item}`}
+														type="checkbox"
+														value=""
+														className="w-4 h-4 cursor-pointer"
+													/>
+													<label
+														htmlFor={`link-checkbox-${item}`}
+														className="ms-2 font-medium text-sm text-[#696a6f] cursor-pointer select-none"
+													>
+														{item}
 													</label>
 												</div>
 											</div>
@@ -194,3 +161,27 @@ const Filter = () => {
 };
 
 export default Filter;
+
+const ChevronButton = ({
+	open,
+	setOpen,
+}: {
+	open: boolean;
+	setOpen: (open: boolean) => void;
+}) => {
+	return (
+		<button
+			onClick={() => setOpen(!open)}
+			className="bg-[#F9FAFB] h-[36px] w-full flex items-center justify-between px-3 font-medium text-sm text-[#333843]"
+		>
+			<span>Date Created</span>
+			<span
+				style={{
+					transform: open ? "rotate(0deg)" : "rotate(180deg)",
+				}}
+			>
+				<ChevronIcon />
+			</span>
+		</button>
+	);
+};
