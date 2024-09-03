@@ -31,7 +31,7 @@ const Filter: React.FC<FilterProps> = ({ onFilterApply }) => {
 	const [statusFilter, setStatusFilter] = useState<string[]>([]);
 	const [paymentStatusFilter, setPaymentStatusFilter] = useState<string[]>([]);
 
-	const [dateOpen, setDateOpen] = useState<boolean>(false);
+	const [dateOpen, setDateOpen] = useState<boolean>(true);
 	const [statusOpen, setStatusOpen] = useState<boolean>(false);
 	const [paymentOpen, setPaymentOpen] = useState<boolean>(false);
 
